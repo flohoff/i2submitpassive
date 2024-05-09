@@ -121,5 +121,9 @@ Add your local users allowed to submit passive check results to the group
 
 Then run i2submitpassive as
 
-    sudo -g nagios /usr/local/sbin/i2submitpassive  --host "brick.b1i.zz.de" --service "foo" --output "foo" --status ok
+    sudo -g nagios /usr/local/sbin/i2submitpassive  \
+        --host "brick.b1i.zz.de" \
+        --service "foo" \
+        --output "foo" \
+        --status ok
 
