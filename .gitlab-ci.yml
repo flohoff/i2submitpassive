@@ -2,6 +2,13 @@
 stages:
   - build
 
+bullseye:
+  image: amd64/debian:bullseye
+  stage: build
+  script:
+    - apt-get update && apt-get -fuy install build-essential cmake libboost-all-dev nlohmann-json3-dev pkg-config libcurlpp-dev
+    - cmake . && make
+
 bookworm:
   image: amd64/debian:bookworm
   stage: build
@@ -15,4 +22,3 @@ sid:
   script:
     - apt-get update && apt-get -fuy install build-essential cmake libboost-all-dev nlohmann-json3-dev pkg-config libcurlpp-dev
     - cmake . && make
-
