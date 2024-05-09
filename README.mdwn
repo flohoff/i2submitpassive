@@ -75,6 +75,8 @@ Permissions
 
 Given your user running icinga2 is **nagios:nagios** on a normal Debian installation:
 
+    chgrp nagios /var/lib/icinga2/certs
+    chmod g+rx /var/lib/icinga2/certs
     chgrp nagios /var/lib/icinga2/certs/*.{crt,key}
     chmod g+r /var/lib/icinga2/certs/*.{crt,key}
     chgrp nagios /etc/icinga2/constants.conf
