@@ -88,10 +88,8 @@ int main(int argc, char **argv) {
 	//
 	// Create post data needed for passive submission
 	//
-	std::string hostname;
-	if (!vm.count("host")) {
-		hostname=nodename;
-	} else {
+	std::string hostname=nodename;
+	if (vm.count("host")) {
 		hostname=vm["host"].as<std::string>();
 	}
 
@@ -103,7 +101,7 @@ int main(int argc, char **argv) {
 	json j;
 
 	std::string filter=boost::str(boost::format("host.name==\"%1%\" && service.name==\"%2%\"") 
-			% vm["host"].as<std::string>() % vm["service"].as<std::string>());
+			% hostname % vm["service"].as<std::string>());
 
 	// Convert OK, WARNING, CRITICAL and UNKNOWN to numerical values for API
 	int status=0;
