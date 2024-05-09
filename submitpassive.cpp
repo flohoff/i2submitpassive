@@ -97,7 +97,9 @@ int main(int argc, char **argv) {
 	int status=0;
 	std::string statusstr=vm["status"].as<std::string>();
 	boost::algorithm::to_lower(statusstr);
-	if (statusstr == "warning")
+	if (statusstr == "ok")
+		status=0;
+	else if (statusstr == "warning")
 		status=1;
 	else if (statusstr == "critical")
 		status=2;
