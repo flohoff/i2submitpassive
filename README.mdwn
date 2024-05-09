@@ -1,0 +1,123 @@
+
+This repo contains a simple C++ program which can be used to submit
+passive check result to an icinga instance.
+
+If you are not running in a distributed monitoring environment you
+most likely wont need this.
+
+Rational
+--------
+
+When submitting passive check results you need API access, typically
+identified by username/password. As using the same username/password
+on your whole infrastructure is not a good idea you want to have 
+individual username/passwords per Agent/Satellite/Zone.
+
+Additionally you typically want to submit your passive check results
+to your local agent/satellite and not to the icinga2 master as that
+may not even be reachable due to firewalling.
+
+The only solution would be to create local configuration on your agent
+with an api username/password which needs to be known from scripts/tools
+submitting passive check results.
+
+To overcome this situation we try using the already deployed certificate
+for authentication and replicating the permissions/username from
+the master down to the agents.
+
+Then the permission to submit passive check results will be up to
+the admin defining uid/gid and file system permissions matching
+the one of the `/var/lib/icinga2/certs/` files.
+
+This is also the reason why this needs to be a c++ binary,
+as shell scripts running a single curl command would not work
+with a _setgid_ or _setuid_ permission bit set.
+
+
+Icinga2 Configuration
+=====================
+
+For every agent/zone you add a config snipped like this to your
+global templates. This would allow scripts allowed to access the
+agents certificate to submit passive check results to the local
+agent, but only for its own zone.
+
+    object ApiUser "passive-b1i.zz.de" {
+            client_cn = "brick.b1i.zz.de"
+            permissions = [
+                    {
+                            permission = "actions/process-check-result"
+                            filter = {{ host.zone == "b1i.zz.de" }}
+                    }
+            ]
+    }
+
+Building i2submitpassive
+========================
+
+    apt-get update && apt-get -fuy install build-essential cmake \
+        libboost-all-dev nlohmann-json3-dev pkg-config libcurlpp-dev
+    cmake . && make
+
+Running i2submitpassive
+=======================
+
+Given your user has the right to read `/etc/icinga2/constants.conf` to get
+this icinga2 agents **nodename**, and `/var/lib/icinga2/certs/$nodename.{crt,key}`
+you simple can run:
+
+    i2submitpassive --host "myhost.b1i.zz.de" --service "Passive service name" 
+        --status ok --output "Check resault as of now"
+
+
+Permissions
+===========
+
+Given your user running icinga2 is **nagios:nagios** on a normal Debian installation:
+
+    chgrp nagios /var/lib/icinga2/certs/*.{crt,key}
+    chmod g+r /var/lib/icinga2/certs/*.{crt,key}
+    chgrp nagios /etc/icinga2/constants.conf
+    chmod g+r /etc/icinga2/constants.conf
+
+Now there are 2 options in letting local users submit passive check results:
+
+_setgid_ binary
+---------------
+
+Making the `i2submitpassive` binary _setgid_:
+
+    chown root:nagios i2submitpassive
+    chmod g+s i2submitpassive
+
+Now all users beeing able to run `i2submitpassive` will have the possibility to
+submit passive check results. You may put it into a directory which is only accessible
+by certain users.
+
+Adding users to the nagios group
+--------------------------------
+
+    addgroup www-data nagios
+
+Now _www-data_ will be able to submit passive check results. But beware - this has the implications
+that ALL scripts running with _www-data_ permissions will be able to read your icinga2 certificate and key.
+
+Using sudo
+----------
+
+Create a group of users which shall be permitted to submit passive check results
+
+    addgroup --system submitpassive
+
+Then create a _sudo_ config which allows these users to run `i2submitpassive`
+
+    %submitpassive ALL=( :nagios ) NOPASSWD: /usr/local/sbin/i2submitpassive
+
+Add your local users allowed to submit passive check results to the group
+    
+    adduser flo submitpassive
+
+Then run i2submitpassive as
+
+    sudo -g nagios /usr/local/sbin/i2submitpassive  --host "brick.b1i.zz.de" --service "foo" --output "foo" --status ok
+
