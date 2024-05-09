@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 3.25)
+cmake_minimum_required (VERSION 3.18)
 project (i2submitpassive)
 
 if(NOT CMAKE_BUILD_TYPE)
