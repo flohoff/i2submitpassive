@@ -12,7 +12,7 @@ set(CMAKE_CXX_FLAGS_RELEASE "-O3")
 include(FindPkgConfig)
 pkg_check_modules(CURLPP REQUIRED curlpp)
 
-find_package(Boost 1.81.0 REQUIRED COMPONENTS program_options)
+find_package(Boost 1.55.0 REQUIRED COMPONENTS program_options)
 include_directories(${Boost_INCLUDE_DIRS})
 
 find_path(JSON_INCLUDE_DIR
