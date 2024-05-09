@@ -55,7 +55,7 @@ int main(int argc, char **argv) {
 		("certdir",	po::value<std::string>()->default_value("/var/lib/icinga2/certs"),	"Icinga2 certificate dir")
 		("api",		po::value<std::string>()->default_value("https://localhost:5665"),	"Icinga2 api")
                 ("nodename",	po::value<std::string>(),		"Icinga2 agent nodename")
-                ("host",	po::value<std::string>()->required(),	"Icinga2 host name")
+                ("host",	po::value<std::string>(),		"Icinga2 host name")
                 ("service",	po::value<std::string>()->required(),	"Icinga2 service name")
 		("output",	po::value<std::string>()->required(),	"Plugin output")
 		("status",	po::value<std::string>()->default_value("ok"),	"ok, critical, warning, unknown")
@@ -88,6 +88,18 @@ int main(int argc, char **argv) {
 	//
 	// Create post data needed for passive submission
 	//
+	std::string hostname;
+	if (!vm.count("host")) {
+		hostname=nodename;
+	} else {
+		hostname=vm["host"].as<std::string>();
+	}
+
+	if (hostname.length() == 0) {
+		std::cerr << "Need hostname for submission" << std::endl;
+		exit(1);
+	}
+
 	json j;
 
 	std::string filter=boost::str(boost::format("host.name==\"%1%\" && service.name==\"%2%\"") 
