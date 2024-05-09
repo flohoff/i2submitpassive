@@ -1,5 +1,5 @@
 cmake_minimum_required (VERSION 3.25)
-project (submitpassive)
+project (i2submitpassive)
 
 if(NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE Release)
@@ -25,5 +25,5 @@ find_path(JSON_INCLUDE_DIR
         )
 message("nlohmann directory ${JSON_INCLUDE_DIR}")
 
-add_executable(submitpassive submitpassive.cpp)
-target_link_libraries(submitpassive ${Boost_LIBRARIES} ${CURLPP_LDFLAGS})
+add_executable(i2submitpassive i2submitpassive.cpp)
+target_link_libraries(i2submitpassive ${Boost_LIBRARIES} ${CURLPP_LDFLAGS})
